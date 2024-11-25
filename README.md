@@ -1,5 +1,35 @@
-# Vue 3 + TypeScript + Vite
+# !!Diph - Budget Management
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+### Run the project
+Install packages
+```shell
+npm install
+```
+Run vite dev server
+```shell
+npm run dev 
+```
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Deployment
+### Build the project
+```shell
+  npm run build
+```
+This will generate static files in the `dist` folder.
+You can then deploy these files to any web server.
+
+## Collaborate
+### Branch naming
+The branches are named according to the following convention:
+- `feature/feature-name` for new features
+
+### Commit messages
+The commit messages are written according to the following convention:
+- `feet: commit message` for new features
+- `fix: commit message` for bug fixes
+- `refactor: commit message` for code refactoring
+- `docs: commit message` for documentation updates
+- `chore: commit message` for other changes'
+
+## License
+Distributed under the MIT License. See LICENSE.txt for more information.
