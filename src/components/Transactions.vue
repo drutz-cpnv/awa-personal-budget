@@ -41,3 +41,36 @@
     </div>
   </template>
   
+  <script>
+  import ApiService from '../services/api.ts'; // Adjust path if necessary
+  
+  export default {
+    data() {
+      return {
+        transactions: [],
+        loading: true,
+      };
+    },
+    mounted() {
+      this.loadTransactions();
+    },
+    methods: {
+      async loadTransactions() {
+        try {
+          // Use your ApiService to fetch transactions
+          const response = await ApiService.getTransactions();
+          this.transactions = response.data.transactions; // Adjust based on your API response structure
+        } catch (error) {
+          console.error('Error loading transactions:', error);
+        } finally {
+          this.loading = false;
+        }
+      },
+    },
+  };
+  </script>
+  
+  <style>
+  /* Add any custom styles here */
+  </style>
+  
