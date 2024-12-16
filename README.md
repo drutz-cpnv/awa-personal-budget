@@ -2,6 +2,16 @@
 
 ### Run the project
 
+#### Backend (Node.js)
+
+```shell
+cd backend
+npm install
+node .\server.js
+```
+
+#### Frontend (Vite)
+
 Install packages
 
 ```shell
