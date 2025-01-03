@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Card,
   CardContent,
@@ -20,19 +21,10 @@ import RecentSales from '@/components/RecentSales.vue'
 
 import Search from '@/components/Search.vue'
 import UserNav from '@/components/UserNav.vue'
+import {Loading} from "@/components/ui/loading";
 </script>
 
 <template>
-  <div class="md:hidden">
-    <VPImage
-        alt="Dashboard"
-        width="1280"
-        height="1214" class="block" :image="{
-        dark: '/examples/dashboard-dark.png',
-        light: '/examples/dashboard-light.png',
-      }"
-    />
-  </div>
 
   <div class="hidden flex-col md:flex">
     <div class="border-b">
@@ -50,8 +42,7 @@ import UserNav from '@/components/UserNav.vue'
           Dashboard
         </h2>
         <div class="flex items-center space-x-2">
-          <DateRangePicker />
-          <Button>Download</Button>
+          <Button>Nouvelle transaction</Button>
         </div>
       </div>
       <Tabs default-value="overview" class="space-y-4">
@@ -90,6 +81,7 @@ import UserNav from '@/components/UserNav.vue'
                 </svg>
               </CardHeader>
               <CardContent>
+                <Loading/>
                 <div class="text-2xl font-bold">
                   $45,231.89
                 </div>

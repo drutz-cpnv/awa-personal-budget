@@ -1,97 +1,62 @@
-<script setup lang="ts">
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar'
-</script>
-
 <template>
   <div class="space-y-8">
-    <div class="flex items-center">
+    <div v-if="loading">
+      <div class="flex flex-col space-y-3">
+        <Skeleton class="h-[125px] w-[250px] rounded-xl" />
+        <div class="space-y-2">
+          <Skeleton class="h-4 w-[250px]" />
+          <Skeleton class="h-4 w-[200px]" />
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center" v-for="transaction in transactions">
       <Avatar class="h-9 w-9">
         <AvatarImage src="/avatars/01.png" alt="Avatar" />
-        <AvatarFallback>OM</AvatarFallback>
+        <AvatarFallback>{{ getFirstTwoWordLetters(transaction.description) }}</AvatarFallback>
       </Avatar>
       <div class="ml-4 space-y-1">
         <p class="text-sm font-medium leading-none">
-          Olivia Martin
+          {{ transaction.description }}
         </p>
         <p class="text-sm text-muted-foreground">
-          olivia.martin@email.com
+          {{ new Date(transaction.date).toLocaleDateString() }}
         </p>
       </div>
       <div class="ml-auto font-medium">
-        +$1,999.00
-      </div>
-    </div>
-    <div class="flex items-center">
-      <Avatar class="flex h-9 w-9 items-center justify-center space-y-0 border">
-        <AvatarImage src="/avatars/02.png" alt="Avatar" />
-        <AvatarFallback>JL</AvatarFallback>
-      </Avatar>
-      <div class="ml-4 space-y-1">
-        <p class="text-sm font-medium leading-none">
-          Jackson Lee
-        </p>
-        <p class="text-sm text-muted-foreground">
-          jackson.lee@email.com
-        </p>
-      </div>
-      <div class="ml-auto font-medium">
-        +$39.00
-      </div>
-    </div>
-    <div class="flex items-center">
-      <Avatar class="h-9 w-9">
-        <AvatarImage src="/avatars/03.png" alt="Avatar" />
-        <AvatarFallback>IN</AvatarFallback>
-      </Avatar>
-      <div class="ml-4 space-y-1">
-        <p class="text-sm font-medium leading-none">
-          Isabella Nguyen
-        </p>
-        <p class="text-sm text-muted-foreground">
-          isabella.nguyen@email.com
-        </p>
-      </div>
-      <div class="ml-auto font-medium">
-        +$299.00
-      </div>
-    </div>
-    <div class="flex items-center">
-      <Avatar class="h-9 w-9">
-        <AvatarImage src="/avatars/04.png" alt="Avatar" />
-        <AvatarFallback>WK</AvatarFallback>
-      </Avatar>
-      <div class="ml-4 space-y-1">
-        <p class="text-sm font-medium leading-none">
-          William Kim
-        </p>
-        <p class="text-sm text-muted-foreground">
-          will@email.com
-        </p>
-      </div>
-      <div class="ml-auto font-medium">
-        +$99.00
-      </div>
-    </div>
-    <div class="flex items-center">
-      <Avatar class="h-9 w-9">
-        <AvatarImage src="/avatars/05.png" alt="Avatar" />
-        <AvatarFallback>SD</AvatarFallback>
-      </Avatar>
-      <div class="ml-4 space-y-1">
-        <p class="text-sm font-medium leading-none">
-          Sofia Davis
-        </p>
-        <p class="text-sm text-muted-foreground">
-          sofia.davis@email.com
-        </p>
-      </div>
-      <div class="ml-auto font-medium">
-        +$39.00
+        {{ transaction.type === 'income' ? '+' : '-' }} {{ transaction.amount }} CHF
       </div>
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import {Avatar, AvatarFallback, AvatarImage,} from '@/components/ui/avatar'
+import ApiService from "@/services/api.ts";
+import {onMounted, ref} from "vue";
+import type {Transaction} from "@/types";
+import { Skeleton } from '@/components/ui/skeleton'
+
+const transactions = ref<Transaction[]>([]);
+const loading = ref(true);
+
+onMounted(async () => {
+  await loadTransactions();
+});
+
+async function loadTransactions() {
+  try {
+    transactions.value = await ApiService.getTransactions(5);
+  } catch (error) {
+    console.error('Error loading transactions:', error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+function getFirstTwoWordLetters(str: string) {
+  const words = str.trim().split(/\s+/);
+  const firstLetter = words[0] ? words[0][0] : '';
+  const secondLetter = words[1] ? words[1][0] : '';
+  return (firstLetter + secondLetter).toUpperCase();
+}
+</script>
