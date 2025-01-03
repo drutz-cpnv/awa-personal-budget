@@ -34,8 +34,13 @@ app.get('/api/categories', (req, res) => {
 
 // Define a route to get all transactions
 app.get('/api/transactions', (req, res) => {
-  const sql = 'SELECT * FROM transactions';
-  db.all(sql, [], (err, rows) => {
+  let sql = 'SELECT * FROM transactions';
+  const params = []
+  if (req.query.count) {
+    sql += ' LIMIT ?'
+    params.push(req.query.count)
+  }
+  db.all(sql, params, (err, rows) => {
     if (err) {
       res.status(400).json({ error: err.message });
       return;

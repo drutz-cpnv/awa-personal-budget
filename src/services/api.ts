@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import type { Transaction } from '../interfaces/transaction';
+import type { Transaction } from '@/types';
 
 /**
  * API service to interact with the backend.
@@ -32,8 +32,13 @@ class ApiService {
    * Get all transactions.
    * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing all transactions.
    */
-  public getTransactions(): Promise<AxiosResponse> {
-    return this.apiClient.get('/transactions');
+  public async getTransactions(count: number|null = null): Promise<Transaction[]> {
+      const response = this.apiClient.get('/transactions', {
+          params: {
+              count: count
+          }
+      });
+      return (await response).data.data as Transaction[];
   }
 
   /**
