@@ -7,26 +7,9 @@ interface Transaction {
     date: string;
 }
 
-export type Categories = {
+export type Category = {
     id: number;
     name?: string | null;
-};
-
-export type Transactions = {
-    amount?: number | null;
-    category?: number | Categories | null;
-    date?: string | null;
-    date_created?: string | null;
-    date_updated?: string | null;
-    description?: string | null;
-    frequency?: string | null;
-    id: number;
-    type?: string | null;
-};
-
-export type Schema = {
-    categories: Categories[];
-    transactions: Transactions[];
 };
 
 type TransactionSumByMonthAndType = {
