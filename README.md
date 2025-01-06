@@ -7,7 +7,7 @@
 ```shell
 cd backend
 npm install
-node .\server.js
+npm start
 ```
 
 #### Frontend (Vite)
