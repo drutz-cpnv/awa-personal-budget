@@ -34,11 +34,15 @@ app.get('/api/categories', (req, res) => {
 
 // Define a route to get all transactions
 app.get('/api/transactions', (req, res) => {
-  let sql = 'SELECT * FROM transactions';
-  const params = []
+  let sql = `
+    SELECT transactions.id, transactions.type, categories.name as category_name, transactions.amount, transactions.frequency, transactions.description, transactions.date
+    FROM transactions
+    JOIN categories ON transactions.category_id = categories.id
+  `;
+  const params = [];
   if (req.query.count) {
-    sql += ' LIMIT ?'
-    params.push(req.query.count)
+    sql += ' LIMIT ?';
+    params.push(req.query.count);
   }
   db.all(sql, params, (err, rows) => {
     if (err) {
