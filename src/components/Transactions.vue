@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-50">
+  <div class="flex items-center justify-center min-h-screen">
     <div class="w-full max-w-2xl">
       <!-- Tabs for filtering -->
       <Tabs v-model="filterType" default-value="all" class="space-y-0">
