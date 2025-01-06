@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import type { Transaction } from '@/types';
+import type { Category, Transaction } from '@/types';
 
 /**
  * API service to interact with the backend.
@@ -22,15 +22,16 @@ class ApiService {
 
   /**
    * Get all categories.
-   * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing all categories.
+   * @returns {Promise<Category[]>} A promise that resolves to the response containing all categories.
    */
-  public getCategories(): Promise<AxiosResponse> {
-    return this.apiClient.get('/categories');
+  public async getCategories(): Promise<Category[]> {
+    const response = this.apiClient.get('/categories');
+    return (await response).data.data as Category[];
   }
 
   /**
    * Get all transactions.
-   * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing all transactions.
+   * @returns {Promise<Transaction[]>} A promise that resolves to the response containing all transactions.
    */
   public async getTransactions(count: number|null = null): Promise<Transaction[]> {
       const response = this.apiClient.get('/transactions', {
@@ -44,19 +45,21 @@ class ApiService {
   /**
    * Get a single transaction by id.
    * @param {number} id - The id of the transaction.
-   * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing the transaction.
+   * @returns {Promise<Transaction>} A promise that resolves to the response containing the transaction.
    */
-  public getTransaction(id: number): Promise<AxiosResponse> {
-    return this.apiClient.get(`/transactions/${id}`);
+  public async getTransaction(id: number): Promise<Transaction> {
+    const response = this.apiClient.get(`/transactions/${id}`);
+    return (await response).data.data as Transaction;
   }
 
   /**
    * Get all transactions for a specific category.
    * @param {number} categoryId - The id of the category.
-   * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing the transactions.
+   * @returns {Promise<Transaction[]>} A promise that resolves to the response containing the transactions.
    */
-  public getTransactionsByCategory(categoryId: number): Promise<AxiosResponse> {
-    return this.apiClient.get(`/categories/${categoryId}/transactions`);
+  public async getTransactionsByCategory(categoryId: number): Promise<Transaction[]> {
+    const response = this.apiClient.get(`/categories/${categoryId}/transactions`);
+    return (await response).data.data as Transaction[];
   }
 
   /**
@@ -64,8 +67,9 @@ class ApiService {
    * @param {Transaction} transaction - The transaction to create.
    * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing the created transaction.
    */
-  public createTransaction(transaction: Transaction): Promise<AxiosResponse> {
-    return this.apiClient.post('/transactions', transaction);
+  public async createTransaction(transaction: Transaction): Promise<AxiosResponse> {
+    const response = this.apiClient.post('/transactions', transaction);
+    return (await response);
   }
 
   /**
@@ -74,8 +78,9 @@ class ApiService {
    * @param {Transaction} transaction - The updated transaction data.
    * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing the updated transaction.
    */
-  public updateTransaction(id: number, transaction: Transaction): Promise<AxiosResponse> {
-    return this.apiClient.put(`/transactions/${id}`, transaction);
+  public async updateTransaction(id: number, transaction: Transaction): Promise<AxiosResponse> {
+    const response = this.apiClient.put(`/transactions/${id}`, transaction);
+    return (await response);
   }
 
   /**
@@ -83,8 +88,9 @@ class ApiService {
    * @param {number} id - The id of the transaction to delete.
    * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing the result of the deletion.
    */
-  public deleteTransaction(id: number): Promise<AxiosResponse> {
-    return this.apiClient.delete(`/transactions/${id}`);
+  public async deleteTransaction(id: number): Promise<AxiosResponse> {
+    const response = this.apiClient.delete(`/transactions/${id}`);
+    return (await response);
   }
 }
 
