@@ -25,7 +25,7 @@
               <td class="px-4 py-2 border border-gray-300">{{ transaction.date }}</td>
               <td class="px-4 py-2 border border-gray-300">${{ transaction.amount }}</td>
               <td class="px-4 py-2 border border-gray-300">{{ transaction.type}}</td>
-              <td class="px-4 py-2 border border-gray-300">{{ transaction.category_id }}</td>
+              <td class="px-4 py-2 border border-gray-300">{{ transaction.category_name }}</td>
 
               
             </tr>
