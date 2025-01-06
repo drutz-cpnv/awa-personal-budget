@@ -22,20 +22,12 @@ import RecentSales from '@/components/RecentSales.vue'
 import Search from '@/components/Search.vue'
 import UserNav from '@/components/UserNav.vue'
 import {Loading} from "@/components/ui/loading";
+import Transactions from "@/components/Transactions.vue";
 </script>
 
 <template>
 
   <div class="hidden flex-col md:flex">
-    <div class="border-b">
-      <div class="flex h-16 items-center px-4">
-        <MainNav class="mx-6" />
-        <div class="ml-auto flex items-center space-x-4">
-          <Search />
-          <UserNav />
-        </div>
-      </div>
-    </div>
     <div class="flex-1 space-y-4 p-8 pt-6">
       <div class="flex items-center justify-between space-y-2">
         <h2 class="text-3xl font-bold tracking-tight">
@@ -50,8 +42,8 @@ import {Loading} from "@/components/ui/loading";
           <TabsTrigger value="overview">
             Overview
           </TabsTrigger>
-          <TabsTrigger value="analytics" disabled>
-            Analytics
+          <TabsTrigger value="transactions">
+            Transactions
           </TabsTrigger>
           <TabsTrigger value="reports" disabled>
             Reports
@@ -196,6 +188,9 @@ import {Loading} from "@/components/ui/loading";
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+        <TabsContent value="transactions" class="space-y-4">
+          <Transactions/>
         </TabsContent>
       </Tabs>
     </div>
