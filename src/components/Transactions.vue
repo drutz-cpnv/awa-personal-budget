@@ -1,17 +1,18 @@
 <template>
-    <div class="max-w-4xl mx-auto p-5">
-      <h1 class="text-2xl font-bold mb-5">Transaction List</h1>
+    <div class="max-w-4xl p-5 mx-auto">
+      <h1 class="mb-5 text-2xl font-bold">Transaction List</h1>
       <!-- Show loading state -->
-      <div v-if="loading" class="text-center py-5">Loading...</div>
+      <div v-if="loading" class="py-5 text-center">Loading...</div>
       <!-- Show table when data is loaded -->
       <div v-else class="overflow-x-auto">
-        <table class="min-w-full table-auto border-collapse border border-gray-300">
+        <table class="min-w-full border border-collapse border-gray-300 table-auto">
           <thead class="bg-gray-100">
             <tr>
-              <th class="border border-gray-300 px-4 py-2 text-left">ID</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">Date</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">Amount</th>
-              <th class="border border-gray-300 px-4 py-2 text-left">Status</th>
+              <th class="px-4 py-2 text-left border border-gray-300">ID</th>
+              <th class="px-4 py-2 text-left border border-gray-300">Date</th>
+              <th class="px-4 py-2 text-left border border-gray-300">Amount</th>
+              <th class="px-4 py-2 text-left border border-gray-300">Type</th>
+              <th class="px-4 py-2 text-left border border-gray-300">Category</th>
             </tr>
           </thead>
           <tbody>
@@ -20,20 +21,13 @@
               :key="transaction.id"
               class="odd:bg-white even:bg-gray-50"
             >
-              <td class="border border-gray-300 px-4 py-2">{{ transaction.id }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ transaction.date }}</td>
-              <td class="border border-gray-300 px-4 py-2">${{ transaction.amount }}</td>
-              <td class="border border-gray-300 px-4 py-2">
-                <span
-                  class="px-3 py-1 rounded"
-                  :class="{
-                    'bg-green-100 text-green-700': transaction.status === 'Success',
-                    'bg-red-100 text-red-700': transaction.status === 'Failed'
-                  }"
-                >
-                  {{ transaction.status }}
-                </span>
-              </td>
+              <td class="px-4 py-2 border border-gray-300">{{ transaction.id }}</td>
+              <td class="px-4 py-2 border border-gray-300">{{ transaction.date }}</td>
+              <td class="px-4 py-2 border border-gray-300">${{ transaction.amount }}</td>
+              <td class="px-4 py-2 border border-gray-300">{{ transaction.type}}</td>
+              <td class="px-4 py-2 border border-gray-300">{{ transaction.category_id }}</td>
+
+              
             </tr>
           </tbody>
         </table>
@@ -59,7 +53,7 @@
         try {
           // Use your ApiService to fetch transactions
           const response = await ApiService.getTransactions();
-          this.transactions = response.data.transactions; // Adjust based on your API response structure
+          this.transactions = response; // Adjust based on your API response structure
         } catch (error) {
           console.error('Error loading transactions:', error);
         } finally {
