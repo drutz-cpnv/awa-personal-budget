@@ -50,7 +50,7 @@
             class="ml-auto font-medium"
             :class="transaction.type === 'income' ? 'text-green-500' : 'text-red-500'"
           >
-            {{ transaction.type === 'income' ? '+' : '-' }} {{ transaction.amount }} CHF
+            {{ transaction.type === 'income' ? '+' : '-' }} {{ toCHF(transaction.amount) }}
           </div>
         </div>
       </div>
@@ -65,6 +65,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ApiService from "@/services/api.ts";
 import { onMounted, ref, computed } from "vue";
 import type { Transaction } from "@/types";
+import { toCHF } from "@/services/formatter.ts";
 
 const transactions = ref<Transaction[]>([]);
 const loading = ref(true);
