@@ -85,7 +85,8 @@ async function loadTransactions() {
   }
 }
 
-function getFirstTwoWordLetters(str: string) {
+function getFirstTwoWordLetters(str?: string) {
+  if (!str) return "";
   const words = str.trim().split(/\s+/);
   const firstLetter = words[0] ? words[0][0] : "";
   const secondLetter = words[1] ? words[1][0] : "";
