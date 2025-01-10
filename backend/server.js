@@ -82,8 +82,8 @@ app.get('/api/categories/:categoryId/transactions', (req, res) => {
 // Define a route to create a new transaction
 app.post('/api/transactions', (req, res) => {
   const { type, category_id, amount, frequency, description, date } = req.body;
-  const sql = 'INSERT INTO transactions (type, category_id, amount, frequency, description, date) VALUES (?, ?, ?, ?, ?, ?)';
-  const params = [type, category_id, amount, frequency, description, date];
+  const sql = 'INSERT INTO transactions (type, category_id, amount, frequency, description) VALUES (?, ?, ?, ?, ?)';
+  const params = [type, category_id, amount, frequency, description];
   db.run(sql, params, function(err) {
     if (err) {
       res.status(400).json({ error: err.message });

@@ -56,7 +56,7 @@ const props = defineProps<{
   <Card>
     <form @submit="onSubmit">
       <CardHeader>
-        <CardTitle>Income</CardTitle>
+        <CardTitle>Expense</CardTitle>
         <CardDescription>
           Create an expense transaction.
         </CardDescription>

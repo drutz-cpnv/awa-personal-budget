@@ -14,11 +14,11 @@ onMounted(async () => {
 
 <template>
   <Tabs default-value="income" class="w-[400px]">
-    <TabsList>
-      <TabsTrigger value="income">
+    <TabsList class="w-full">
+      <TabsTrigger value="income" class="w-full">
         Income
       </TabsTrigger>
-      <TabsTrigger value="expense">
+      <TabsTrigger value="expense" class="w-full">
         Expense
       </TabsTrigger>
     </TabsList>
