@@ -1,23 +1,105 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen">
-    <div class="w-full max-w-2xl">
-      <!-- Tabs for filtering -->
-      <Tabs v-model="filterType" default-value="all" class="space-y-0">
-        <TabsList class="grid w-full grid-cols-3">
-          <TabsTrigger value="all">
-            All
-          </TabsTrigger>
-          <TabsTrigger value="income">
-            Income
-          </TabsTrigger>
-          <TabsTrigger value="expense">
-            Expense
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-      
+  <div class="flex justify-center min-h-screen bg-gray-50">
+    <div class="w-full max-w-2xl p-4 space-y-4">
+      <!-- Filters and Sort Options -->
+      <div class="flex items-center justify-between space-x-2">
+        <!-- Tabs for filtering by type -->
+        <Tabs v-model="filterType" default-value="all" class="space-y-0">
+          <TabsList class="grid w-full grid-cols-3">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="income">Income</TabsTrigger>
+            <TabsTrigger value="expense">Expense</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <!-- Combo Box for category filter -->
+        <Popover v-model:open="categoryPopoverOpen">
+          <PopoverTrigger as-child>
+            <Button
+              variant="outline"
+              role="combobox"
+              :aria-expanded="categoryPopoverOpen"
+              class="w-[200px] justify-between"
+            >
+              {{
+                selectedCategory
+                  ? uniqueCategories.find((category) => category === selectedCategory)?.toUpperCase()
+                  : "Select Category..."
+              }}
+
+              <ChevronsUpDown class="w-4 h-4 ml-2 opacity-50 shrink-0" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent class="w-[200px] p-0">
+            <Command v-model="selectedCategory">
+              <CommandInput placeholder="Search category..." />
+              <CommandEmpty>No category found.</CommandEmpty>
+              <CommandList>
+                <CommandGroup>
+                  <CommandItem
+                    v-for="category in uniqueCategories"
+                    :key="category"
+                    :value="category"
+                    @select="categoryPopoverOpen = false"
+                  >
+                    <Check
+                      :class="cn(
+                        'mr-2 h-4 w-4',
+                        selectedCategory === category
+                          ? 'opacity-100'
+                          : 'opacity-0'
+                      )"
+                    />
+                    {{ category }}
+                  </CommandItem>
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
+        <!-- Sort by Date -->
+        <Button
+          @click="toggleSortOrder"
+          variant="default"
+          class="flex items-center space-x-2"
+        >
+          <span>Sort by Date</span>
+          <svg
+            v-if="sortOrder === 'asc'"
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-4 h-4 transform rotate-180"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </Button>
+      </div>
+
       <!-- Loading state with skeleton components -->
-      <div v-if="loading" class="mt-4 space-y-4">
+      <div v-if="loading">
         <div class="flex flex-col space-y-3">
           <Skeleton class="h-[125px] w-[250px] rounded-xl" />
           <div class="space-y-2">
@@ -27,10 +109,10 @@
         </div>
       </div>
 
-      <!-- Filtered List of transactions -->
-      <div v-else class="mt-4 space-y-4">
+      <!-- Filtered and Sorted List of transactions -->
+      <div v-else class="space-y-4">
         <div
-          v-for="transaction in filteredTransactions"
+          v-for="transaction in sortedAndFilteredTransactions"
           :key="transaction.id"
           class="flex items-center p-4 bg-white rounded-lg shadow-md"
         >
@@ -41,6 +123,9 @@
           <div class="ml-4 space-y-1">
             <p class="text-sm font-medium leading-none">
               {{ transaction.description }}
+            </p>
+            <p class="text-sm text-muted-foreground">
+              {{ transaction.category_name }}
             </p>
             <p class="text-sm text-muted-foreground">
               {{ new Date(transaction.date).toLocaleDateString() }}
@@ -59,25 +144,35 @@
 </template>
 
 <script setup lang="ts">
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Importing Tab components
+import { ref, computed, onMounted } from "vue";
+import { Button } from "@/components/ui/button";
+import {Tabs,TabsList,TabsTrigger,} from "@/components/ui/tabs";
+import {Popover,PopoverContent,PopoverTrigger,} from "@/components/ui/popover";
+import {Command,CommandEmpty,CommandGroup,CommandInput,CommandItem,CommandList,} from "@/components/ui/command";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Check, ChevronsUpDown } from "lucide-vue-next";
+import { cn } from "@/lib/utils";
 import ApiService from "@/services/api.ts";
-import { onMounted, ref, computed } from "vue";
 import type { Transaction } from "@/types";
 import { toCHF } from "@/services/formatter.ts";
 
+// State variables
 const transactions = ref<Transaction[]>([]);
 const loading = ref(true);
-const filterType = ref<'all' | 'income' | 'expense'>('all'); // Filter state
+const filterType = ref<"all" | "income" | "expense">("all");
+const selectedCategory = ref<string>("");
+const sortOrder = ref<"asc" | "desc">("desc");
+const categoryPopoverOpen = ref(false);
 
+// Fetch transactions
 onMounted(async () => {
   await loadTransactions();
 });
 
 async function loadTransactions() {
   try {
-    transactions.value = await ApiService.getTransactions(); // Fetching 5 transactions
+    transactions.value = await ApiService.getTransactions();
   } catch (error) {
     console.error("Error loading transactions:", error);
   } finally {
@@ -85,19 +180,42 @@ async function loadTransactions() {
   }
 }
 
-function getFirstTwoWordLetters(str?: string) {
-  if (!str) return "";
+// Computed values
+const uniqueCategories = computed(() =>
+  Array.from(new Set(transactions.value.map((t) => t.category_name)))
+);
+
+const sortedAndFilteredTransactions = computed(() => {
+  let filtered = transactions.value;
+
+  if (filterType.value !== "all") {
+    filtered = filtered.filter(
+      (transaction) => transaction.type === filterType.value
+    );
+  }
+
+  if (selectedCategory.value) {
+    filtered = filtered.filter(
+      (transaction) => transaction.category_name === selectedCategory.value
+    );
+  }
+
+  return filtered.sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return sortOrder.value === "asc" ? dateA - dateB : dateB - dateA;
+  });
+});
+
+// Helper methods
+function toggleSortOrder() {
+  sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
+}
+
+function getFirstTwoWordLetters(str: string) {
   const words = str.trim().split(/\s+/);
   const firstLetter = words[0] ? words[0][0] : "";
   const secondLetter = words[1] ? words[1][0] : "";
   return (firstLetter + secondLetter).toUpperCase();
 }
-
-// Computed property to filter transactions based on the filterType
-const filteredTransactions = computed(() => {
-  if (filterType.value === 'all') {
-    return transactions.value;
-  }
-  return transactions.value.filter((transaction) => transaction.type === filterType.value);
-});
 </script>
