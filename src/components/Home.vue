@@ -17,10 +17,10 @@ import {
 import DateRangePicker from '@/components/DateRangePicker.vue'
 import MainNav from '@/components/MainNav.vue'
 import Overview from '@/components/Overview.vue'
-import RecentSales from '@/components/RecentSales.vue'
 
 import Search from '@/components/Search.vue'
 import UserNav from '@/components/UserNav.vue'
+import RecentTransactions from '@/components/RecentTransactions.vue'
 import {Loading} from "@/components/ui/loading";
 import Transactions from "@/components/Transactions.vue";
 </script>
@@ -184,7 +184,7 @@ import Transactions from "@/components/Transactions.vue";
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RecentSales />
+                <RecentTransactions/>
               </CardContent>
             </Card>
           </div>

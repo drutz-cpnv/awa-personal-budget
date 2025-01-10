@@ -1,15 +1,15 @@
 interface Transaction {
-    type: string;
-    category_id: number;
+    type: "income" | "expense";
+    category_id: number | string;
     amount: number;
     frequency: string;
     description: string;
-    date: string;
+    date?: string;
 }
 
 export type Category = {
     id: number;
-    name?: string | null;
+    name: string;
 };
 
 type TransactionSumByMonthAndType = {
