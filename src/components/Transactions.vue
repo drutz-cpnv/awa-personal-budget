@@ -154,6 +154,7 @@ import { cn } from "@/lib/utils";
 import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import type { Transaction } from "@/types";
 import { toCHF } from "@/services/formatter.ts";
+import {useReload} from "@/services/hooks.ts";
 
 const transactions = ref<Transaction[]>([]);
 const loading = ref(true);
@@ -186,6 +187,7 @@ async function deleteSelectedTransactions() {
       (t) => !selectedTransactionIds.value.includes(t.id)
     );
     selectedTransactionIds.value = [];
+    triggerReload()
   } catch (error) {
     console.error("Error deleting transactions:", error);
   }
@@ -264,4 +266,8 @@ function leave(el: HTMLElement, done: () => void) {
     done()
   })
 }
+
+
+const { triggerReload } = useReload()
+
 </script>
