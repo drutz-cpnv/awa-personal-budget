@@ -22,7 +22,7 @@
             >
               {{
                 selectedCategory
-                  ? uniqueCategories.find((category) => category === selectedCategory)?.toUpperCase()
+                  ? uniqueCategories.find((category) => category === selectedCategory)
                   : "Select Category..."
               }}
               <ChevronsUpDown class="w-4 h-4 ml-2 opacity-50 shrink-0" />
@@ -30,10 +30,10 @@
           </PopoverTrigger>
           <PopoverContent class="w-[200px] p-0">
             
-          <!-- Clear Category Filter Button -->
-          <Button variant="destructive" class="w-[198px] justify-between rounded-md rounded-bl-none rounded-br-none" @click="clearCategoryFilter">
-            Clear Category
-          </Button>
+            <!-- Clear Category Filter Button -->
+            <Button variant="destructive" class="w-[198px] justify-between rounded-md rounded-bl-none rounded-br-none" @click="clearCategoryFilter">
+              Clear Category
+            </Button>
             <Command v-model="selectedCategory">
               <CommandInput placeholder="Search category..." />
               <CommandEmpty>No category found.</CommandEmpty>
