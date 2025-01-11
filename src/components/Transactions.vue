@@ -29,6 +29,11 @@
             </Button>
           </PopoverTrigger>
           <PopoverContent class="w-[200px] p-0">
+            
+        <!-- Clear Category Filter Button -->
+          <Button variant="destructive" class="w-[200px] justify-between" @click="clearCategoryFilter">
+            Clear Category
+          </Button>
             <Command v-model="selectedCategory">
               <CommandInput placeholder="Search category..." />
               <CommandEmpty>No category found.</CommandEmpty>
@@ -55,7 +60,6 @@
             </Command>
           </PopoverContent>
         </Popover>
-
         <Button @click="toggleSortOrder" variant="default" class="flex items-center space-x-2">
           <span>Sort by Date</span>
           <svg v-if="sortOrder === 'asc'" class="w-4 h-4 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,6 +69,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </Button>
+
       </div>
 
       <!-- Delete Selected Button -->
@@ -107,7 +112,7 @@
         <div
           v-for="(transaction, i) in sortedAndFilteredTransactions"
           :key="transaction.id"
-          class="transaction-item flex items-center p-4 bg-white rounded-lg shadow-md"
+          class="flex items-center p-4 bg-white rounded-lg shadow-md transaction-item"
           :data-index="i"
         >
           <input
@@ -139,11 +144,6 @@
           </div>
         </div>
       </transition-group>
-
-      <!-- Clear Category Filter Button 
-      <Button variant="outline" class="mt-4" @click="clearCategoryFilter">
-        Clear Category Filter
-      </Button>-->
     </div>
   </div>
 </template>
