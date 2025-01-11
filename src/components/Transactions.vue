@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-center min-h-screen bg-gray-50">
+  <div class="flex justify-center min-h-screen">
     <div class="w-full max-w-2xl p-4 space-y-4">
       <!-- Filters and Sort Options -->
       <div class="flex items-center justify-between space-x-2">
