@@ -123,3 +123,8 @@
 .slide-fade-leave-active {
   transition: all 10s ease;
 }
+
+#app {
+    height: 100vh;
+    background-color: #FFF;
+}

@@ -2,23 +2,23 @@
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs'
 import IncomeForm from "@/components/form/IncomeForm.vue";
 import {onMounted, ref} from "vue";
-import ApiService from "@/services/api.ts";
+import CategoryRepository from "@/repositories/CategoryRepository.ts";
 import type {Category} from "@/types.ts";
 import ExpenseForm from "@/components/form/ExpenseForm.vue";
 
 const categories = ref<Category[]>([]);
 onMounted(async () => {
-  categories.value = await ApiService.getCategories();
+  categories.value = await CategoryRepository.findAll();
 });
 </script>
 
 <template>
   <Tabs default-value="income" class="w-[400px]">
-    <TabsList>
-      <TabsTrigger value="income">
+    <TabsList class="w-full">
+      <TabsTrigger value="income" class="w-full">
         Income
       </TabsTrigger>
-      <TabsTrigger value="expense">
+      <TabsTrigger value="expense" class="w-full">
         Expense
       </TabsTrigger>
     </TabsList>

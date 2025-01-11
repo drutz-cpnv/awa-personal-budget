@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import type { Category, Transaction } from '@/types';
+import type {Category, Transaction, TransactionYear} from '@/types';
 
 /**
  * API service to interact with the backend.
@@ -9,10 +9,10 @@ import type { Category, Transaction } from '@/types';
  * - VITE_API_BASE_URL: The base URL of the API.
  */
 class ApiService {
-  private apiClient: AxiosInstance;
+  public client: AxiosInstance;
 
   constructor() {
-    this.apiClient = axios.create({
+    this.client = axios.create({
       baseURL: import.meta.env.VITE_API_BASE_URL,
       headers: {
         'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ class ApiService {
    * @returns {Promise<Category[]>} A promise that resolves to the response containing all categories.
    */
   public async getCategories(): Promise<Category[]> {
-    const response = this.apiClient.get('/categories');
+    const response = this.client.get('/categories');
     return (await response).data.data as Category[];
   }
 
@@ -34,7 +34,7 @@ class ApiService {
    * @returns {Promise<Transaction[]>} A promise that resolves to the response containing all transactions.
    */
   public async getTransactions(count: number|null = null): Promise<Transaction[]> {
-      const response = this.apiClient.get('/transactions', {
+      const response = this.client.get('/transactions', {
           params: {
               count: count
           }
@@ -43,12 +43,21 @@ class ApiService {
   }
 
   /**
+   * Get all years during which a transaction have been made
+   * @returns {Promise<TransactionYear[]>} A promise that resolves to the response containing all transactions.
+   */
+  public async getMetaYears(count: number|null = null): Promise<TransactionYear[]> {
+    const response = this.client.get('/meta/years');
+    return (await response).data.data as TransactionYear[];
+  }
+
+  /**
    * Get a single transaction by id.
    * @param {number} id - The id of the transaction.
    * @returns {Promise<Transaction>} A promise that resolves to the response containing the transaction.
    */
   public async getTransaction(id: number): Promise<Transaction> {
-    const response = this.apiClient.get(`/transactions/${id}`);
+    const response = this.client.get(`/transactions/${id}`);
     return (await response).data.data as Transaction;
   }
 
@@ -58,7 +67,7 @@ class ApiService {
    * @returns {Promise<Transaction[]>} A promise that resolves to the response containing the transactions.
    */
   public async getTransactionsByCategory(categoryId: number): Promise<Transaction[]> {
-    const response = this.apiClient.get(`/categories/${categoryId}/transactions`);
+    const response = this.client.get(`/categories/${categoryId}/transactions`);
     return (await response).data.data as Transaction[];
   }
 
@@ -68,7 +77,7 @@ class ApiService {
    * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing the created transaction.
    */
   public async createTransaction(transaction: Transaction): Promise<AxiosResponse> {
-    const response = this.apiClient.post('/transactions', transaction);
+    const response = this.client.post('/transactions', transaction);
     return (await response);
   }
 
@@ -79,7 +88,7 @@ class ApiService {
    * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing the updated transaction.
    */
   public async updateTransaction(id: number, transaction: Transaction): Promise<AxiosResponse> {
-    const response = this.apiClient.put(`/transactions/${id}`, transaction);
+    const response = this.client.put(`/transactions/${id}`, transaction);
     return (await response);
   }
 
@@ -89,9 +98,11 @@ class ApiService {
    * @returns {Promise<AxiosResponse>} A promise that resolves to the response containing the result of the deletion.
    */
   public async deleteTransaction(id: number): Promise<AxiosResponse> {
-    const response = this.apiClient.delete(`/transactions/${id}`);
+    const response = this.client.delete(`/transactions/${id}`);
     return (await response);
   }
 }
 
-export default new ApiService();
+export type ApiServiceType = ApiService;
+
+export const api = new ApiService();

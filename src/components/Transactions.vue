@@ -161,7 +161,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check, ChevronsUpDown } from "lucide-vue-next";
 import { cn } from "@/lib/utils";
-import ApiService from "@/services/api.ts";
+import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import type { Transaction } from "@/types";
 import { toCHF } from "@/services/formatter.ts";
 
@@ -227,7 +227,7 @@ onMounted(async () => {
 
 async function loadTransactions() {
   try {
-    transactions.value = await ApiService.getTransactions();
+    transactions.value = await TransactionRepository.findAll()
   } catch (error) {
     console.error("Error loading transactions:", error);
   } finally {

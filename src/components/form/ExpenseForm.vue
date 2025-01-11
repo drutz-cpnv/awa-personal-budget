@@ -9,10 +9,12 @@ import {toTypedSchema} from "@vee-validate/zod";
 import * as z from "zod";
 import {useForm} from "vee-validate";
 import type {Category, Transaction} from "@/types.ts";
-import ApiService from "@/services/api.ts";
+import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import { Textarea } from '@/components/ui/textarea'
+import {useReload} from "@/services/hooks.ts";
 
 
+const { triggerReload } = useReload()
 
 const formSchema = toTypedSchema(z.object({
   amount: z.number().positive(),
@@ -29,22 +31,9 @@ const form = useForm({
 const onSubmit = form.handleSubmit(v => {
   const values = {...v}
   values.type = 'expense'
-  console.log(values)
-  ApiService.createTransaction(values as Transaction)
+  TransactionRepository.create(values)
+  triggerReload()
 })
-
-/*const onSubmit = async (e: Event) => {
-  e.preventDefault()
-  form.submitForm(e)
-  console.log(form.values)
-  const values = {...form.values}
-  values.type = 'income'
-  console.log(values)
-
-  await ApiService.createTransaction(values)
-}*/
-
-
 
 const props = defineProps<{
   categories: Category[]
@@ -56,7 +45,7 @@ const props = defineProps<{
   <Card>
     <form @submit="onSubmit">
       <CardHeader>
-        <CardTitle>Income</CardTitle>
+        <CardTitle>Expense</CardTitle>
         <CardDescription>
           Create an expense transaction.
         </CardDescription>

@@ -1,28 +1,43 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
-import DateRangePicker from '@/components/DateRangePicker.vue'
-import MainNav from '@/components/MainNav.vue'
+import {Button} from '@/components/ui/button'
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from '@/components/ui/card'
+import {Tabs, TabsContent, TabsList, TabsTrigger,} from '@/components/ui/tabs'
 import Overview from '@/components/Overview.vue'
-
-import Search from '@/components/Search.vue'
-import UserNav from '@/components/UserNav.vue'
 import RecentTransactions from '@/components/RecentTransactions.vue'
 import {Loading} from "@/components/ui/loading";
 import Transactions from "@/components/Transactions.vue";
+import {Drawer, DrawerContent, DrawerTrigger,} from '@/components/ui/drawer'
+import TransactionForm from "@/components/TransactionForm.vue";
+import TransactionRepository from "@/repositories/TransactionRepository.ts";
+import {onMounted, ref, watch} from "vue";
+import type {Transaction, TransactionSumByYearAndType} from "@/types.ts";
+import {useReload} from "@/services/hooks.ts";
+import {groupDataByYearAndType} from "@/services/formatter.ts";
+import {toCHF} from "@/services/formatter.ts";
+
+onMounted(async () => {
+  await loadData()
+})
+
+const transactions = ref<Transaction[]>()
+const { needsReload, resetReload } = useReload()
+const yearIncomeSum = ref()
+const lastYearIncomSum = ref()
+
+async function loadData() {
+  transactions.value = await TransactionRepository.findAll()
+  yearIncomeSum.value = groupDataByYearAndType(transactions.value)[2025].income
+  lastYearIncomSum.value = groupDataByYearAndType(transactions.value)[2024].income
+}
+
+watch(needsReload, async (val) => {
+  if (val) {
+    await loadData();
+    resetReload();
+  }
+})
+
+
 </script>
 
 <template>
@@ -34,7 +49,16 @@ import Transactions from "@/components/Transactions.vue";
           Dashboard
         </h2>
         <div class="flex items-center space-x-2">
-          <Button>Nouvelle transaction</Button>
+          <Drawer>
+            <DrawerTrigger as-child>
+              <Button>Nouvelle transaction</Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <div class="mx-auto w-full max-w-sm py-10">
+                <TransactionForm/>
+              </div>
+            </DrawerContent>
+          </Drawer>
         </div>
       </div>
       <Tabs default-value="overview" class="space-y-4">
@@ -45,19 +69,13 @@ import Transactions from "@/components/Transactions.vue";
           <TabsTrigger value="transactions">
             Transactions
           </TabsTrigger>
-          <TabsTrigger value="reports" disabled>
-            Reports
-          </TabsTrigger>
-          <TabsTrigger value="notifications" disabled>
-            Notifications
-          </TabsTrigger>
         </TabsList>
         <TabsContent value="overview" class="space-y-4">
           <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle class="text-sm font-medium">
-                  Total Revenue
+                  Total Income {{ (new Date()).getFullYear() }}
                 </CardTitle>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -69,16 +87,16 @@ import Transactions from "@/components/Transactions.vue";
                     strokeWidth="2"
                     class="h-4 w-4 text-muted-foreground"
                 >
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 </svg>
               </CardHeader>
               <CardContent>
-                <Loading/>
-                <div class="text-2xl font-bold">
-                  $45,231.89
+                <div v-if="yearIncomeSum" class="text-2xl font-bold">
+                  {{ toCHF(yearIncomeSum) }}
                 </div>
+                <Loading v-else/>
                 <p class="text-xs text-muted-foreground">
-                  +20.1% from last month
+                  {{ (yearIncomeSum - lastYearIncomSum) < 0 ? '-' : '+' }} {{ Math.round((lastYearIncomSum/ yearIncomeSum) * 100) }}% from last year ({{ toCHF(lastYearIncomSum) }})
                 </p>
               </CardContent>
             </Card>
@@ -97,9 +115,9 @@ import Transactions from "@/components/Transactions.vue";
                     strokeWidth="2"
                     class="h-4 w-4 text-muted-foreground"
                 >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
               </CardHeader>
               <CardContent>
@@ -126,8 +144,8 @@ import Transactions from "@/components/Transactions.vue";
                     strokeWidth="2"
                     class="h-4 w-4 text-muted-foreground"
                 >
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <path d="M2 10h20" />
+                  <rect width="20" height="14" x="2" y="5" rx="2"/>
+                  <path d="M2 10h20"/>
                 </svg>
               </CardHeader>
               <CardContent>
@@ -154,7 +172,7 @@ import Transactions from "@/components/Transactions.vue";
                     strokeWidth="2"
                     class="h-4 w-4 text-muted-foreground"
                 >
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                 </svg>
               </CardHeader>
               <CardContent>
@@ -173,7 +191,8 @@ import Transactions from "@/components/Transactions.vue";
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
               <CardContent class="pl-2">
-                <Overview />
+                <Overview v-if="transactions" :data="transactions"/>
+                <Loading v-else/>
               </CardContent>
             </Card>
             <Card class="col-span-3">
@@ -184,7 +203,7 @@ import Transactions from "@/components/Transactions.vue";
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RecentTransactions/>
+                <RecentTransactions v-if="transactions" :transactions="transactions.slice(-5)"/>
               </CardContent>
             </Card>
           </div>

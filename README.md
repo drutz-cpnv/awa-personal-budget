@@ -35,7 +35,7 @@ npm run build
 This will generate static files in the `dist` folder. You can then deploy these
 files to any web server.
 
-### Build the DB
+### Build the DB (only on windows)
 
 #### Windows
 
