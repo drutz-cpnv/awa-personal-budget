@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import {AreaChart} from '@/components/ui/chart-area'
 
-import ApiService from "@/services/api.ts";
+import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import {onMounted, ref} from "vue";
 import type {Transaction, TransactionSumByMonthAndType} from "@/types";
 import {getMonth} from "@/services/month.ts";
@@ -20,9 +20,9 @@ onMounted(async () => {
 });
 
 async function loadTransactions() {
+
   try {
-    // Use your ApiService to fetch transactions
-    transactions.value = await ApiService.getTransactions(); // Adjust based on your API response structure
+    transactions.value = await TransactionRepository.findAll()
   } catch (error) {
     console.error('Error loading transactions:', error);
   } finally {

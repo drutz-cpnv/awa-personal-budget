@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import {Avatar, AvatarFallback, AvatarImage,} from '@/components/ui/avatar'
-import ApiService from "@/services/api.ts";
+import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import {onMounted, ref} from "vue";
 import type {Transaction} from "@/types";
 import { Skeleton } from '@/components/ui/skeleton'
@@ -46,7 +46,7 @@ onMounted(async () => {
 
 async function loadTransactions() {
   try {
-    transactions.value = await ApiService.getTransactions(5);
+    transactions.value = await TransactionRepository.findAll({ count: 5});
   } catch (error) {
     console.error('Error loading transactions:', error);
   } finally {
