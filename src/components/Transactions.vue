@@ -30,8 +30,8 @@
           </PopoverTrigger>
           <PopoverContent class="w-[200px] p-0">
             
-        <!-- Clear Category Filter Button -->
-          <Button variant="destructive" class="w-[200px] justify-between" @click="clearCategoryFilter">
+          <!-- Clear Category Filter Button -->
+          <Button variant="destructive" class="w-[198px] justify-between rounded-md rounded-bl-none rounded-br-none" @click="clearCategoryFilter">
             Clear Category
           </Button>
             <Command v-model="selectedCategory">
