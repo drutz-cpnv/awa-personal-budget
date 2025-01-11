@@ -21,8 +21,14 @@ type TransactionSumByMonthAndType = {
     [month: string]: { income: number; expense: number };
 };
 
+export type TransactionSumByMonthAndYearAndType = {
+    [year: string]: {
+        [month: string]: {income: Transaction[], expense: Transaction[]}
+    };
+};
+
 export type TransactionSumByYearAndType = {
     [month: string]: { income: number; expense: number };
 };
 
-export type { Transaction, TransactionSumByMonthAndType };
+export type {Transaction, TransactionSumByMonthAndType};
