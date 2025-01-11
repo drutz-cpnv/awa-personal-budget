@@ -12,6 +12,7 @@ import type {Category} from "@/types.ts";
 import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import {Textarea} from '@/components/ui/textarea'
 import {useReload} from "@/services/hooks.ts";
+import { useToast } from '@/components/ui/toast/use-toast'
 
 const { triggerReload } = useReload()
 
@@ -23,6 +24,8 @@ const formSchema = toTypedSchema(z.object({
   category_id: z.string(),
 }))
 
+const { toast } = useToast()
+
 const form = useForm({
   validationSchema: formSchema,
 })
@@ -33,6 +36,9 @@ const onSubmit = form.handleSubmit(v => {
   console.log(values)
   TransactionRepository.create(values)
   triggerReload()
+  toast({
+    description: 'Your income has been added.',
+  });
 })
 
 const props = defineProps<{

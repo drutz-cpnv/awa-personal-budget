@@ -20,6 +20,11 @@ class TransactionRepository implements Repository<Transaction> {
         return (await response).data.data as Transaction;
     }
 
+    async findMonthlyByMonth(month: string, params?: Object): Promise<Transaction[]> {
+        const response = this.service.client.get(`/transactions/monthly/${month}`);
+        return (await response).data.data as Transaction[];
+    }
+
     async findByCategory(categoryId: string, params?: Object): Promise<Transaction[]> {
         const response = this.service.client.get(`/transactions/${categoryId}/transactions`);
         return (await response).data.data as Transaction[];

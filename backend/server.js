@@ -82,6 +82,19 @@ app.get('/api/transactions/:id', (req, res) => {
   });
 });
 
+// Define a route to get a single transaction by id
+app.get('/api/transactions/monthly/:month', (req, res) => {
+  const sql = "SELECT * FROM transactions WHERE strftime('%m', date) = ? AND frequency = 'monthly'";
+  const params = [req.params.month.padStart(2, '0')];
+  db.all(sql, params, (err, row) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ data: row });
+  });
+});
+
 // Define a route to get all transactions for a specific category
 app.get('/api/categories/:categoryId/transactions', (req, res) => {
   const sql = 'SELECT * FROM transactions WHERE category_id = ?';
