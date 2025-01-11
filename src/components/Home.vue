@@ -6,21 +6,37 @@ import Overview from '@/components/Overview.vue'
 import RecentTransactions from '@/components/RecentTransactions.vue'
 import {Loading} from "@/components/ui/loading";
 import Transactions from "@/components/Transactions.vue";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer'
+import {Drawer, DrawerContent, DrawerTrigger,} from '@/components/ui/drawer'
 import TransactionForm from "@/components/TransactionForm.vue";
+import TransactionRepository from "@/repositories/TransactionRepository.ts";
+import {onMounted, ref, watch} from "vue";
+import type {Transaction, TransactionSumByYearAndType} from "@/types.ts";
+import {useReload} from "@/services/hooks.ts";
+import {groupDataByYearAndType} from "@/services/formatter.ts";
+import {toCHF} from "@/services/formatter.ts";
 
-function showNewForm() {
-  console.log('Show new form');
+onMounted(async () => {
+  await loadData()
+})
+
+const transactions = ref<Transaction[]>()
+const { needsReload, resetReload } = useReload()
+const yearIncomeSum = ref()
+const lastYearIncomSum = ref()
+
+async function loadData() {
+  transactions.value = await TransactionRepository.findAll()
+  yearIncomeSum.value = groupDataByYearAndType(transactions.value)[2025].income
+  lastYearIncomSum.value = groupDataByYearAndType(transactions.value)[2024].income
 }
+
+watch(needsReload, async (val) => {
+  if (val) {
+    await loadData();
+    resetReload();
+  }
+})
+
 
 </script>
 
@@ -59,7 +75,7 @@ function showNewForm() {
             <Card>
               <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle class="text-sm font-medium">
-                  Total Revenue
+                  Total Income {{ (new Date()).getFullYear() }}
                 </CardTitle>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -75,12 +91,12 @@ function showNewForm() {
                 </svg>
               </CardHeader>
               <CardContent>
-                <Loading/>
-                <div class="text-2xl font-bold">
-                  $45,231.89
+                <div v-if="yearIncomeSum" class="text-2xl font-bold">
+                  {{ toCHF(yearIncomeSum) }}
                 </div>
+                <Loading v-else/>
                 <p class="text-xs text-muted-foreground">
-                  +20.1% from last month
+                  {{ (yearIncomeSum - lastYearIncomSum) < 0 ? '-' : '+' }} {{ Math.round((lastYearIncomSum/ yearIncomeSum) * 100) }}% from last year ({{ toCHF(lastYearIncomSum) }})
                 </p>
               </CardContent>
             </Card>
@@ -175,7 +191,8 @@ function showNewForm() {
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
               <CardContent class="pl-2">
-                <Overview/>
+                <Overview v-if="transactions" :data="transactions"/>
+                <Loading v-else/>
               </CardContent>
             </Card>
             <Card class="col-span-3">
@@ -186,7 +203,7 @@ function showNewForm() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RecentTransactions/>
+                <RecentTransactions v-if="transactions" :transactions="transactions.slice(-5)"/>
               </CardContent>
             </Card>
           </div>

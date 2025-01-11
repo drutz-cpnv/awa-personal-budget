@@ -1,15 +1,6 @@
 <template>
   <div class="space-y-8">
-    <div v-if="loading">
-      <div class="flex flex-col space-y-3">
-        <Skeleton class="h-[125px] w-[250px] rounded-xl" />
-        <div class="space-y-2">
-          <Skeleton class="h-4 w-[250px]" />
-          <Skeleton class="h-4 w-[200px]" />
-        </div>
-      </div>
-    </div>
-    <div class="flex items-center" v-for="transaction in transactions">
+    <div class="flex items-center" v-for="transaction in props.transactions">
       <Avatar class="h-9 w-9">
         <AvatarImage src="/avatars/01.png" alt="Avatar" />
         <AvatarFallback>{{ getFirstTwoWordLetters(transaction.description) }}</AvatarFallback>
@@ -31,28 +22,15 @@
 
 <script setup lang="ts">
 import {Avatar, AvatarFallback, AvatarImage,} from '@/components/ui/avatar'
-import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import {onMounted, ref} from "vue";
 import type {Transaction} from "@/types";
 import { Skeleton } from '@/components/ui/skeleton'
 import { toCHF } from "@/services/formatter.ts";
 
-const transactions = ref<Transaction[]>([]);
-const loading = ref(true);
 
-onMounted(async () => {
-  await loadTransactions();
-});
-
-async function loadTransactions() {
-  try {
-    transactions.value = await TransactionRepository.findAll({ count: 5});
-  } catch (error) {
-    console.error('Error loading transactions:', error);
-  } finally {
-    loading.value = false;
-  }
-}
+const props = defineProps<{
+  transactions: Transaction[]
+}>()
 
 function getFirstTwoWordLetters(str: string) {
   const words = str.trim().split(/\s+/);
