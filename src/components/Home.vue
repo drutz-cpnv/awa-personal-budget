@@ -26,8 +26,8 @@ const lastYearIncomSum = ref()
 
 async function loadData() {
   transactions.value = await TransactionRepository.findAll()
-  yearIncomeSum.value = groupDataByYearAndType(transactions.value)[2025].income
-  lastYearIncomSum.value = groupDataByYearAndType(transactions.value)[2024].income
+  yearIncomeSum.value = groupDataByYearAndType(transactions.value)[(new Date()).getFullYear()].income
+  lastYearIncomSum.value = groupDataByYearAndType(transactions.value)[(new Date()).getFullYear()-1].income
 }
 
 watch(needsReload, async (val) => {
@@ -197,10 +197,7 @@ watch(needsReload, async (val) => {
             </Card>
             <Card class="col-span-3">
               <CardHeader>
-                <CardTitle>Recent Sales</CardTitle>
-                <CardDescription>
-                  You made 265 sales this month.
-                </CardDescription>
+                <CardTitle>Recent Transactions</CardTitle>
               </CardHeader>
               <CardContent>
                 <RecentTransactions v-if="transactions" :transactions="transactions.slice(-5)"/>
