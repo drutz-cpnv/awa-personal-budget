@@ -89,7 +89,14 @@
       </div>
 
       <!-- Filtered and Sorted List of transactions -->
-      <transition-group tag="div" class="space-y-4" appear>
+      <transition-group
+        tag="div"
+        class="space-y-4"
+        appear
+        @before-enter="beforeEnter"
+        @enter="enter"
+        @leave="leave" 
+      >
         <div
           v-for="(transaction, index) in sortedAndFilteredTransactions"
           :key="transaction.id"
@@ -218,5 +225,43 @@ function getFirstTwoWordLetters(str: string) {
   const firstLetter = words[0] ? words[0][0] : "";
   const secondLetter = words[1] ? words[1][0] : "";
   return (firstLetter + secondLetter).toUpperCase();
+}
+
+function beforeEnter(el: HTMLElement) {
+  // Use the index to decide initial transform (left or right).
+  const index = Number(el.dataset.index) || 0
+  // If even: come from the left; if odd: come from the right.
+  if (index % 2 === 0) {
+    el.style.transform = "translateX(-50px)"
+  } else {
+    el.style.transform = "translateX(50px)"
+  }
+  el.style.opacity = "0"
+}
+function enter(el: HTMLElement, done: () => void) {
+  const index = Number(el.dataset.index) || 0
+  // Stagger by index, e.g. 80ms per item
+  const delay = index * 80
+  setTimeout(() => {
+    // Start the transition
+    el.style.transition = "all 0.4s ease"
+    el.style.transform = "translateX(0)"
+    el.style.opacity = "1"
+    // When the transition ends, call done() to tell Vue it’s finished
+    el.addEventListener("transitionend", function handler() {
+      el.removeEventListener("transitionend", handler)
+      done()
+    })
+  }, delay)
+}
+function leave(el: HTMLElement, done: () => void) {
+  // This is optional if you also want a staggered or directional leave
+  el.style.transition = "all 0.4s ease"
+  el.style.transform = "translateX(-50px)"
+  el.style.opacity = "0"
+  el.addEventListener("transitionend", function handler() {
+    el.removeEventListener("transitionend", handler)
+    done()
+  })
 }
 </script>
