@@ -12,6 +12,7 @@ import type {Category, Transaction} from "@/types.ts";
 import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import { Textarea } from '@/components/ui/textarea'
 import {useReload} from "@/services/hooks.ts";
+import { useToast } from '@/components/ui/toast/use-toast'
 
 
 const { triggerReload } = useReload()
@@ -28,11 +29,16 @@ const form = useForm({
   validationSchema: formSchema,
 })
 
+const { toast } = useToast()
+
 const onSubmit = form.handleSubmit(v => {
   const values = {...v}
   values.type = 'expense'
   TransactionRepository.create(values)
   triggerReload()
+  toast({
+    description: 'Your expense has been added.',
+  });
 })
 
 const props = defineProps<{

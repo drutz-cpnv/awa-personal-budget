@@ -14,6 +14,7 @@ import type {Transaction, TransactionSumByYearAndType} from "@/types.ts";
 import {useReload} from "@/services/hooks.ts";
 import {groupDataByYearAndType} from "@/services/formatter.ts";
 import {toCHF} from "@/services/formatter.ts";
+import Toaster from "./ui/toast/Toaster.vue";
 
 onMounted(async () => {
   await loadData()
@@ -63,6 +64,7 @@ watch(needsReload, async (val) => {
               <div class="mx-auto w-full max-w-sm py-10">
                 <TransactionForm/>
               </div>
+              <Toaster />
             </DrawerContent>
           </Drawer>
         </div>
