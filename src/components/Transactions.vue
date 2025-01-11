@@ -126,10 +126,10 @@
         </div>
       </transition-group>
 
-      <!-- Clear Category Filter Button -->
+      <!-- Clear Category Filter Button 
       <Button variant="outline" class="mt-4" @click="clearCategoryFilter">
         Clear Category Filter
-      </Button>
+      </Button>-->
     </div>
   </div>
 </template>
