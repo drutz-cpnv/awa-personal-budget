@@ -106,8 +106,6 @@
         @before-leave="beforeLeave"
         @after-enter="afterEnter"
         @after-leave="afterLeave"
-        @before-move="beforeMove"
-        @move="move"
       >
         <div
           v-for="(transaction, i) in sortedAndFilteredTransactions"
@@ -161,7 +159,7 @@ import { cn } from "@/lib/utils";
 import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import type { Transaction } from "@/types";
 import { toCHF } from "@/services/formatter.ts";
-import {useReload} from "@/services/hooks.ts";
+import { useReload } from "@/services/hooks.ts";
 import anime from "animejs";
 
 const transactions = ref<Transaction[]>([]);
@@ -172,8 +170,12 @@ const sortOrder = ref<"asc" | "desc">("desc");
 const categoryPopoverOpen = ref(false);
 const selectedTransactionIds = ref<number[]>([]);
 
+const isFirstRender = ref(true);
+const skipAnimations = ref(false);
+
 onMounted(async () => {
   await loadTransactions();
+  isFirstRender.value = false;
 });
 
 async function loadTransactions() {
@@ -195,7 +197,7 @@ async function deleteSelectedTransactions() {
       (t) => !selectedTransactionIds.value.includes(t.id)
     );
     selectedTransactionIds.value = [];
-    triggerReload()
+    triggerReload();
   } catch (error) {
     console.error("Error deleting transactions:", error);
   }
@@ -210,6 +212,7 @@ const uniqueCategories = computed(() =>
 );
 
 const sortedAndFilteredTransactions = computed(() => {
+  skipAnimations.value = true;
   let filtered = transactions.value;
   if (filterType.value !== "all") {
     filtered = filtered.filter((transaction) => transaction.type === filterType.value);
@@ -227,6 +230,7 @@ const sortedAndFilteredTransactions = computed(() => {
 });
 
 function toggleSortOrder() {
+  skipAnimations.value = true;
   sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
 }
 
@@ -238,60 +242,46 @@ function getFirstTwoWordLetters(str: string) {
 }
 
 function beforeEnter(el: HTMLElement) {
+  if (!isFirstRender.value && skipAnimations.value) return; 
   el.style.opacity = "0";
   el.style.transform = "translateY(-40px)";
-
-  anime({
-    targets: el,
-    opacity: [0, 1],
-    translateY: [-40, 0],
-    duration: 500,
-    easing: "easeOutExpo",
-    duration: 700,
-    easing: "easeOutBack",
-    delay: anime.stagger(50, { start: +el.dataset.index! * 90 }),
-  });
 }
 
 function enter(el: HTMLElement, done: () => void) {
+  if (!isFirstRender.value && skipAnimations.value) {
+    done();
+    return;
+  }
+
   const i = +el.dataset.index!;
 
   anime({
     targets: el,
     opacity: [0, 1],
     translateY: [-40, 0],
-    duration: 500,
-    easing: "easeOutExpo",
     duration: 700,
     easing: "easeOutBack",
-    delay: anime.stagger(50, { start: i * 100 }),
+    delay: i * 50,
     complete: done,
   });
 }
 
 function beforeLeave(el: HTMLElement) {
+  if (skipAnimations.value) return;
   el.style.opacity = "1";
   el.style.transform = "translateY(0)";
-
-  anime({
-    targets: el,
-    opacity: [1, 0],
-    translateY: [0, 40],
-    duration: 400,
-    easing: "easeInExpo",
-    duration: 700,
-    easing: "easeInBack",
-    delay: anime.stagger(50, { start: +el.dataset.index! * 50 }),
-  });
 }
 
 function leave(el: HTMLElement, done: () => void) {
+  if (skipAnimations.value) {
+    done();
+    return;
+  }
+
   anime({
     targets: el,
     opacity: [1, 0],
     translateY: [0, 40],
-    duration: 400,
-    easing: "easeInExpo",
     duration: 700,
     easing: "easeInBack",
     complete: done,
@@ -308,48 +298,5 @@ function afterLeave(el: HTMLElement) {
   el.style.transform = "";
 }
 
-function beforeMove(el: HTMLElement) {
-  const { left, top } = el.getBoundingClientRect();
-  el.dataset.oldLeft = String(left);
-  el.dataset.oldTop = String(top);
-
-  anime({
-    targets: el,
-    opacity: [1, 0],
-    duration: 400,
-    easing: "easeInExpo",
-    duration: 700,
-    easing: "easeInBack",
-    delay: anime.stagger(50, { start: +el.dataset.index! * 50 }),
-  });
-}
-
-function move(el: HTMLElement, done: () => void) {
-  const oldLeft = parseFloat(el.dataset.oldLeft ?? "0");
-  const oldTop = parseFloat(el.dataset.oldTop ?? "0");
-
-  const { left, top } = el.getBoundingClientRect();
-  const dx = oldLeft - left;
-  const dy = oldTop - top;
-  const i = +el.dataset.index!;
-
-  if (!dx && !dy) {
-    return done();
-  }
-
-  anime({
-    targets: el,
-    translateX: [dx, 0],
-    translateY: [dy, 0],
-    duration: 500,
-    easing: "easeOutExpo",
-    duration: 700,
-    easing: "easeOutBack",
-    delay: anime.stagger(50, { start: i * 50 }),
-    complete: done,
-  });
-}
-
-const { triggerReload } = useReload()
-
+const { triggerReload } = useReload();
 </script>
