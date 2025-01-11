@@ -90,18 +90,25 @@
 
       <!-- Filtered and Sorted List of transactions -->
       <transition-group
+        name="list-transition"
         tag="div"
         class="space-y-4"
+        :css="false"
         appear
         @before-enter="beforeEnter"
         @enter="enter"
-        @leave="leave" 
+        @leave="leave"
+        @before-leave="beforeLeave"
+        @after-enter="afterEnter"
+        @after-leave="afterLeave"
+        @before-move="beforeMove"
+        @move="move"
       >
         <div
-          v-for="(transaction, index) in sortedAndFilteredTransactions"
+          v-for="(transaction, i) in sortedAndFilteredTransactions"
           :key="transaction.id"
-          :data-index="index"
-          class="flex items-center p-4 bg-white rounded-lg shadow-md"
+          class="transaction-item flex items-center p-4 bg-white rounded-lg shadow-md"
+          :data-index="i"
         >
           <input
             type="checkbox"
@@ -155,6 +162,7 @@ import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import type { Transaction } from "@/types";
 import { toCHF } from "@/services/formatter.ts";
 import {useReload} from "@/services/hooks.ts";
+import anime from "animejs";
 
 const transactions = ref<Transaction[]>([]);
 const loading = ref(true);
@@ -230,43 +238,117 @@ function getFirstTwoWordLetters(str: string) {
 }
 
 function beforeEnter(el: HTMLElement) {
-  // Use the index to decide initial transform (left or right).
-  const index = Number(el.dataset.index) || 0
-  // If even: come from the left; if odd: come from the right.
-  if (index % 2 === 0) {
-    el.style.transform = "translateX(-50px)"
-  } else {
-    el.style.transform = "translateX(50px)"
-  }
-  el.style.opacity = "0"
-}
-function enter(el: HTMLElement, done: () => void) {
-  const index = Number(el.dataset.index) || 0
-  // Stagger by index, e.g. 80ms per item
-  const delay = index * 80
-  setTimeout(() => {
-    // Start the transition
-    el.style.transition = "all 0.4s ease"
-    el.style.transform = "translateX(0)"
-    el.style.opacity = "1"
-    // When the transition ends, call done() to tell Vue it’s finished
-    el.addEventListener("transitionend", function handler() {
-      el.removeEventListener("transitionend", handler)
-      done()
-    })
-  }, delay)
-}
-function leave(el: HTMLElement, done: () => void) {
-  // This is optional if you also want a staggered or directional leave
-  el.style.transition = "all 0.4s ease"
-  el.style.transform = "translateX(-50px)"
-  el.style.opacity = "0"
-  el.addEventListener("transitionend", function handler() {
-    el.removeEventListener("transitionend", handler)
-    done()
-  })
+  el.style.opacity = "0";
+  el.style.transform = "translateY(-40px)";
+
+  anime({
+    targets: el,
+    opacity: [0, 1],
+    translateY: [-40, 0],
+    duration: 500,
+    easing: "easeOutExpo",
+    duration: 700,
+    easing: "easeOutBack",
+    delay: anime.stagger(50, { start: +el.dataset.index! * 90 }),
+  });
 }
 
+function enter(el: HTMLElement, done: () => void) {
+  const i = +el.dataset.index!;
+
+  anime({
+    targets: el,
+    opacity: [0, 1],
+    translateY: [-40, 0],
+    duration: 500,
+    easing: "easeOutExpo",
+    duration: 700,
+    easing: "easeOutBack",
+    delay: anime.stagger(50, { start: i * 100 }),
+    complete: done,
+  });
+}
+
+function beforeLeave(el: HTMLElement) {
+  el.style.opacity = "1";
+  el.style.transform = "translateY(0)";
+
+  anime({
+    targets: el,
+    opacity: [1, 0],
+    translateY: [0, 40],
+    duration: 400,
+    easing: "easeInExpo",
+    duration: 700,
+    easing: "easeInBack",
+    delay: anime.stagger(50, { start: +el.dataset.index! * 50 }),
+  });
+}
+
+function leave(el: HTMLElement, done: () => void) {
+  anime({
+    targets: el,
+    opacity: [1, 0],
+    translateY: [0, 40],
+    duration: 400,
+    easing: "easeInExpo",
+    duration: 700,
+    easing: "easeInBack",
+    complete: done,
+  });
+}
+
+function afterEnter(el: HTMLElement) {
+  el.style.opacity = "";
+  el.style.transform = "";
+}
+
+function afterLeave(el: HTMLElement) {
+  el.style.opacity = "";
+  el.style.transform = "";
+}
+
+function beforeMove(el: HTMLElement) {
+  const { left, top } = el.getBoundingClientRect();
+  el.dataset.oldLeft = String(left);
+  el.dataset.oldTop = String(top);
+
+  anime({
+    targets: el,
+    opacity: [1, 0],
+    duration: 400,
+    easing: "easeInExpo",
+    duration: 700,
+    easing: "easeInBack",
+    delay: anime.stagger(50, { start: +el.dataset.index! * 50 }),
+  });
+}
+
+function move(el: HTMLElement, done: () => void) {
+  const oldLeft = parseFloat(el.dataset.oldLeft ?? "0");
+  const oldTop = parseFloat(el.dataset.oldTop ?? "0");
+
+  const { left, top } = el.getBoundingClientRect();
+  const dx = oldLeft - left;
+  const dy = oldTop - top;
+  const i = +el.dataset.index!;
+
+  if (!dx && !dy) {
+    return done();
+  }
+
+  anime({
+    targets: el,
+    translateX: [dx, 0],
+    translateY: [dy, 0],
+    duration: 500,
+    easing: "easeOutExpo",
+    duration: 700,
+    easing: "easeOutBack",
+    delay: anime.stagger(50, { start: i * 50 }),
+    complete: done,
+  });
+}
 
 const { triggerReload } = useReload()
 
