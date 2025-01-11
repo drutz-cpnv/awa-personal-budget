@@ -23,7 +23,7 @@ onMounted(async () => {
 
   for (const groupedKey in result) {
     data.value.push({
-      name: getMonth(Number.parseInt(groupedKey.split('-')[1], 10)),
+      name: getMonth(Number.parseInt(groupedKey.split('-')[1], 10)) + ' ' + groupedKey.split('-')[0],
       Dépense: result[groupedKey].expense,
       Revenus: result[groupedKey].income
     })
