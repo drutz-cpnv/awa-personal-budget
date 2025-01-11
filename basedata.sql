@@ -1,11 +1,11 @@
 -- Insert sample categories
 INSERT INTO categories (name)
-VALUES ('work'),
-       ('hobbies'),
-       ('bills'),
-       ('food'),
-       ('entertainment'),
-       ('savings');
+VALUES ('Work'),
+       ('Hobbies'),
+       ('Bills'),
+       ('Food'),
+       ('Entertainment'),
+       ('Savings');
 
 -- Insert sample transactions
 INSERT INTO transactions (type,

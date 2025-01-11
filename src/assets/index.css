@@ -87,43 +87,6 @@
     }
 }
 
-/* Enter (or appear) from: initial state before the transition starts */
-.slide-fade-enter-from,
-.slide-fade-appear-from {
-  opacity: 0;
-  transform: translateX(-50px);
-}
-
-/* Enter (or appear) to: end state when transition finishes */
-.slide-fade-enter-to,
-.slide-fade-appear-to {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Enter (or appear) active: the duration and timing of the transition */
-.slide-fade-enter-active,
-.slide-fade-appear-active {
-  transition: all 10s ease;
-}
-
-/* Leave from: state at the beginning of leaving transition */
-.slide-fade-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Leave to: final state when leaving transition finishes */
-.slide-fade-leave-to {
-  opacity: 0;
-  transform: translateX(50px);
-}
-
-/* Leave active: the duration and timing of the leave transition */
-.slide-fade-leave-active {
-  transition: all 10s ease;
-}
-
 #app {
     height: 100vh;
     background-color: #FFF;

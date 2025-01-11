@@ -29,6 +29,11 @@
             </Button>
           </PopoverTrigger>
           <PopoverContent class="w-[200px] p-0">
+            
+          <!-- Clear Category Filter Button -->
+          <Button variant="destructive" class="w-[198px] justify-between rounded-md rounded-bl-none rounded-br-none" @click="clearCategoryFilter">
+            Clear Category
+          </Button>
             <Command v-model="selectedCategory">
               <CommandInput placeholder="Search category..." />
               <CommandEmpty>No category found.</CommandEmpty>
@@ -55,7 +60,6 @@
             </Command>
           </PopoverContent>
         </Popover>
-
         <Button @click="toggleSortOrder" variant="default" class="flex items-center space-x-2">
           <span>Sort by Date</span>
           <svg v-if="sortOrder === 'asc'" class="w-4 h-4 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,6 +69,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </Button>
+
       </div>
 
       <!-- Delete Selected Button -->
@@ -90,18 +95,23 @@
 
       <!-- Filtered and Sorted List of transactions -->
       <transition-group
+        name="list-transition"
         tag="div"
         class="space-y-4"
+        :css="false"
         appear
         @before-enter="beforeEnter"
         @enter="enter"
-        @leave="leave" 
+        @leave="leave"
+        @before-leave="beforeLeave"
+        @after-enter="afterEnter"
+        @after-leave="afterLeave"
       >
         <div
-          v-for="(transaction, index) in sortedAndFilteredTransactions"
+          v-for="(transaction, i) in sortedAndFilteredTransactions"
           :key="transaction.id"
-          :data-index="index"
-          class="flex items-center p-4 bg-white rounded-lg shadow-md"
+          class="flex items-center p-4 bg-white rounded-lg shadow-md transaction-item"
+          :data-index="i"
         >
           <input
             type="checkbox"
@@ -132,11 +142,6 @@
           </div>
         </div>
       </transition-group>
-
-      <!-- Clear Category Filter Button 
-      <Button variant="outline" class="mt-4" @click="clearCategoryFilter">
-        Clear Category Filter
-      </Button>-->
     </div>
   </div>
 </template>
@@ -154,7 +159,8 @@ import { cn } from "@/lib/utils";
 import TransactionRepository from "@/repositories/TransactionRepository.ts";
 import type { Transaction } from "@/types";
 import { toCHF } from "@/services/formatter.ts";
-import {useReload} from "@/services/hooks.ts";
+import { useReload } from "@/services/hooks.ts";
+import anime from "animejs";
 
 const transactions = ref<Transaction[]>([]);
 const loading = ref(true);
@@ -164,8 +170,12 @@ const sortOrder = ref<"asc" | "desc">("desc");
 const categoryPopoverOpen = ref(false);
 const selectedTransactionIds = ref<number[]>([]);
 
+const isFirstRender = ref(true);
+const skipAnimations = ref(false);
+
 onMounted(async () => {
   await loadTransactions();
+  isFirstRender.value = false;
 });
 
 async function loadTransactions() {
@@ -187,7 +197,7 @@ async function deleteSelectedTransactions() {
       (t) => !selectedTransactionIds.value.includes(t.id)
     );
     selectedTransactionIds.value = [];
-    triggerReload()
+    triggerReload();
   } catch (error) {
     console.error("Error deleting transactions:", error);
   }
@@ -202,6 +212,7 @@ const uniqueCategories = computed(() =>
 );
 
 const sortedAndFilteredTransactions = computed(() => {
+  skipAnimations.value = true;
   let filtered = transactions.value;
   if (filterType.value !== "all") {
     filtered = filtered.filter((transaction) => transaction.type === filterType.value);
@@ -219,6 +230,7 @@ const sortedAndFilteredTransactions = computed(() => {
 });
 
 function toggleSortOrder() {
+  skipAnimations.value = true;
   sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
 }
 
@@ -230,44 +242,61 @@ function getFirstTwoWordLetters(str: string) {
 }
 
 function beforeEnter(el: HTMLElement) {
-  // Use the index to decide initial transform (left or right).
-  const index = Number(el.dataset.index) || 0
-  // If even: come from the left; if odd: come from the right.
-  if (index % 2 === 0) {
-    el.style.transform = "translateX(-50px)"
-  } else {
-    el.style.transform = "translateX(50px)"
-  }
-  el.style.opacity = "0"
+  if (!isFirstRender.value && skipAnimations.value) return; 
+  el.style.opacity = "0";
+  el.style.transform = "translateY(-40px)";
 }
+
 function enter(el: HTMLElement, done: () => void) {
-  const index = Number(el.dataset.index) || 0
-  // Stagger by index, e.g. 80ms per item
-  const delay = index * 80
-  setTimeout(() => {
-    // Start the transition
-    el.style.transition = "all 0.4s ease"
-    el.style.transform = "translateX(0)"
-    el.style.opacity = "1"
-    // When the transition ends, call done() to tell Vue it’s finished
-    el.addEventListener("transitionend", function handler() {
-      el.removeEventListener("transitionend", handler)
-      done()
-    })
-  }, delay)
+  if (!isFirstRender.value && skipAnimations.value) {
+    done();
+    return;
+  }
+
+  const i = +el.dataset.index!;
+
+  anime({
+    targets: el,
+    opacity: [0, 1],
+    translateY: [-40, 0],
+    duration: 700,
+    easing: "easeOutBack",
+    delay: i * 50,
+    complete: done,
+  });
 }
+
+function beforeLeave(el: HTMLElement) {
+  if (skipAnimations.value) return;
+  el.style.opacity = "1";
+  el.style.transform = "translateY(0)";
+}
+
 function leave(el: HTMLElement, done: () => void) {
-  // This is optional if you also want a staggered or directional leave
-  el.style.transition = "all 0.4s ease"
-  el.style.transform = "translateX(-50px)"
-  el.style.opacity = "0"
-  el.addEventListener("transitionend", function handler() {
-    el.removeEventListener("transitionend", handler)
-    done()
-  })
+  if (skipAnimations.value) {
+    done();
+    return;
+  }
+
+  anime({
+    targets: el,
+    opacity: [1, 0],
+    translateY: [0, 40],
+    duration: 700,
+    easing: "easeInBack",
+    complete: done,
+  });
 }
 
+function afterEnter(el: HTMLElement) {
+  el.style.opacity = "";
+  el.style.transform = "";
+}
 
-const { triggerReload } = useReload()
+function afterLeave(el: HTMLElement) {
+  el.style.opacity = "";
+  el.style.transform = "";
+}
 
+const { triggerReload } = useReload();
 </script>
