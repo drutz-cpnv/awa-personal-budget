@@ -110,35 +110,43 @@
       </div>
 
       <!-- Filtered and Sorted List of transactions -->
-      <div v-else class="space-y-4">
+      <transition-group
+        tag="div"
+        class="space-y-4"
+        appear
+        @before-enter="beforeEnter"
+        @enter="enter"
+        @leave="leave"
+      >
+      <div
+        v-for="(transaction, index) in sortedAndFilteredTransactions"
+        :key="transaction.id"
+        :data-index="index"
+        class="flex items-center p-4 bg-white rounded-lg shadow-md"
+      >
+        <Avatar class="h-9 w-9">
+          <AvatarImage src="/avatars/01.png" alt="Avatar" />
+          <AvatarFallback>{{ getFirstTwoWordLetters(transaction.description) }}</AvatarFallback>
+        </Avatar>
+        <div class="ml-4 space-y-1">
+          <p class="text-sm font-medium leading-none">
+            {{ transaction.description }}
+          </p>
+          <p class="text-sm text-muted-foreground">
+            {{ transaction.category_name }}
+          </p>
+          <p class="text-sm text-muted-foreground">
+            {{ new Date(transaction.date).toLocaleDateString() }}
+          </p>
+        </div>
         <div
-          v-for="transaction in sortedAndFilteredTransactions"
-          :key="transaction.id"
-          class="flex items-center p-4 bg-white rounded-lg shadow-md"
+          class="ml-auto font-medium"
+          :class="transaction.type === 'income' ? 'text-green-500' : 'text-red-500'"
         >
-          <Avatar class="h-9 w-9">
-            <AvatarImage src="/avatars/01.png" alt="Avatar" />
-            <AvatarFallback>{{ getFirstTwoWordLetters(transaction.description) }}</AvatarFallback>
-          </Avatar>
-          <div class="ml-4 space-y-1">
-            <p class="text-sm font-medium leading-none">
-              {{ transaction.description }}
-            </p>
-            <p class="text-sm text-muted-foreground">
-              {{ transaction.category_name }}
-            </p>
-            <p class="text-sm text-muted-foreground">
-              {{ new Date(transaction.date).toLocaleDateString() }}
-            </p>
-          </div>
-          <div
-            class="ml-auto font-medium"
-            :class="transaction.type === 'income' ? 'text-green-500' : 'text-red-500'"
-          >
-            {{ transaction.type === 'income' ? '+' : '-' }} {{ toCHF(transaction.amount) }}
-          </div>
+          {{ transaction.type === 'income' ? '+' : '-' }} {{ toCHF(transaction.amount) }}
         </div>
       </div>
+    </transition-group>
     </div>
   </div>
 </template>
@@ -156,6 +164,53 @@ import { cn } from "@/lib/utils";
 import ApiService from "@/services/api.ts";
 import type { Transaction } from "@/types";
 import { toCHF } from "@/services/formatter.ts";
+
+function beforeEnter(el: HTMLElement) {
+  // Use the index to decide initial transform (left or right).
+  const index = Number(el.dataset.index) || 0
+
+  // If even: come from the left; if odd: come from the right.
+  if (index % 2 === 0) {
+    el.style.transform = "translateX(-50px)"
+  } else {
+    el.style.transform = "translateX(50px)"
+  }
+
+  el.style.opacity = "0"
+}
+
+function enter(el: HTMLElement, done: () => void) {
+  const index = Number(el.dataset.index) || 0
+
+  // Stagger by index, e.g. 80ms per item
+  const delay = index * 80
+
+  setTimeout(() => {
+    // Start the transition
+    el.style.transition = "all 0.4s ease"
+    el.style.transform = "translateX(0)"
+    el.style.opacity = "1"
+
+    // When the transition ends, call done() to tell Vue it’s finished
+    el.addEventListener("transitionend", function handler() {
+      el.removeEventListener("transitionend", handler)
+      done()
+    })
+  }, delay)
+}
+
+function leave(el: HTMLElement, done: () => void) {
+  // This is optional if you also want a staggered or directional leave
+  el.style.transition = "all 0.4s ease"
+  el.style.transform = "translateX(-50px)"
+  el.style.opacity = "0"
+
+  el.addEventListener("transitionend", function handler() {
+    el.removeEventListener("transitionend", handler)
+    done()
+  })
+}
+
 
 // State variables
 const transactions = ref<Transaction[]>([]);
