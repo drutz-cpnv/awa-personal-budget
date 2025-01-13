@@ -1,0 +1,69 @@
+@startuml
+
+' Actor representing the user
+actor User as U
+
+' Frontend components with notes for functionality
+package "Frontend" {
+    component Dashboard {
+        note as N1
+        - View summary metrics
+        - Navigate to transaction tab
+        end note
+    }
+
+    component Transactions {
+        note as N2
+        - Filter by type (Income/Expense/All)
+        - Filter by category
+        - Sort transactions by date
+        - Delete selected transactions
+        end note
+    }
+
+    component TransactionForm {
+        note as N3
+        - Add new transactions
+        end note
+    }
+
+    component APIService {
+        note as N4
+        - Communicate with Backend
+        end note
+    }
+}
+
+' Backend components with endpoints
+package "Backend" {
+    component API {
+        note as N6
+        - /api/categories
+        - /api/transactions
+        - /api/transactions/:id
+        - /api/meta/years
+        - /api/categories/:categoryId/transactions
+        end note
+    }
+
+    ' Relation to the database
+    API --> SQLite : Executes queries
+}
+
+' Database representation
+database SQLite {
+    note as N7
+    - Stores transactions
+    end note
+}
+
+' Relations between components
+Dashboard -down-> Transactions : Navigate tabs
+Transactions -right-> APIService : Fetch/Filter Transactions
+Transactions -down-> TransactionForm : Add/Edit/Delete
+TransactionForm -down-> APIService : Submit transaction data
+APIService -down-> API : HTTP requests
+
+' User interaction
+U -down-> Dashboard : Interacts with the application
+@enduml
